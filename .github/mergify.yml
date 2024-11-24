@@ -1,45 +1,43 @@
 queue_rules:
-  - name: shared_queue
-    conditions:
-      - "#approved-reviews-by>=2"
-
-pull_request_rules:
-  - name: automatic merge of hotfix (high priority)
-    conditions:
+  - name: duplicated shared_queue from put other pr to merge queue
+    queue_conditions:
       - "#approved-reviews-by>=2"
       - label=PR-bug
       - label!=PR-docs
       - check-success~=^stonedb-build(.*)
-    actions:
-      queue:
-        name: shared_queue
-        method: rebase
-
-  - name: put other pr to merge queue
-    conditions:
       - "#approved-reviews-by>=2"
       - label!=PR-bug
       - label!=PR-docs
       - check-success~=^stonedb-build(.*)
-    actions:
-      queue:
-        name: shared_queue
-        method: rebase
-
-  - name: put docs to merge queue
-    conditions:
+    merge_conditions: []
+    merge_method: rebase
+    method: rebase
+  - name: duplicated shared_queue from put docs to merge queue
+    queue_conditions:
+      - "#approved-reviews-by>=2"
+      - label=PR-bug
+      - label!=PR-docs
+      - check-success~=^stonedb-build(.*)
       - "#approved-reviews-by>=2"
       - label=PR-docs
-    actions:
-      queue:
-        name: shared_queue
-        method: rebase
+    merge_conditions: []
+    merge_method: rebase
+    method: rebase
+  - name: shared_queue
+    queue_conditions:
+      - "#approved-reviews-by>=2"
+      - label=PR-bug
+      - label!=PR-docs
+      - check-success~=^stonedb-build(.*)
+    merge_conditions:
+      - "#approved-reviews-by>=2"
+    merge_method: rebase
 
-  # Check if PR title contain valid types
+pull_request_rules:
   - name: Comment PR if title not semantic
     conditions:
-          - author!=Mergify
-          - '-title~=^(feat|fix|docs|workflow|perf|style|refactor|test|website|chore)(\(.*\))?:'
+      - author!=Mergify
+      - '-title~=^(feat|fix|docs|workflow|perf|style|refactor|test|website|chore)(\(.*\))?:'
     actions:
       comment:
         message: |
@@ -151,3 +149,7 @@ pull_request_rules:
       label:
         add:
           - PR-chore
+  - name: refactored queue action rule
+    conditions: []
+    actions:
+      queue:
